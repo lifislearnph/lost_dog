@@ -116,6 +116,14 @@ public partial class Player : CharacterBody2D // 自带 Velocity + MoveAndSlide
 	private Vector2 _shakeBaseOffset;
 	private ulong _shakeEndAtMs;
 	private float _shakeStrength;
+	
+	//锁定玩家对player操作有效输入
+	private bool _lockPlayerInput;
+	internal bool IsInputLocked => _lockPlayerInput;
+	public void SetLockPlayerInput(bool islock)
+	{
+		_lockPlayerInput=islock;
+	}
 
 	/// <summary>子节点 _Ready 早于父节点，在此先把血量对齐到 Max，避免首帧读到 0。</summary>
 	public override void _EnterTree()
@@ -223,14 +231,19 @@ public partial class Player : CharacterBody2D // 自带 Velocity + MoveAndSlide
   // 空行：分隔 _Ready 与物理更新。  
 	public override void _PhysicsProcess(double delta) // 每个物理帧调用（固定步长），处理移动/碰撞最合适。  
 	{ // _PhysicsProcess 方法体开始。  
-		var dt = (float)delta; // 把 delta 转为 float 方便 Mathf 和字段类型一致。  
-		var lookX = Mathf.Sign(Input.GetAxis("left", "right"));
-		if (lookX != 0f)
-			_facingDirectionX = lookX;
+		var dt = (float)delta; // 把 delta 转为 float 方便 Mathf 和字段类型一致。
+		if(!_lockPlayerInput){  
+			var lookX = Mathf.Sign(Input.GetAxis("left", "right"));
+			if (lookX != 0f)
+				_facingDirectionX = lookX;
+		}
 		if (_hitInvulnRemaining > 0f)
 			_hitInvulnRemaining = Mathf.Max(0f, _hitInvulnRemaining - dt);
 		_stateMachine.PhysicsTick(dt);
 		_abilityManager?.Update(dt);
+
+		if(_lockPlayerInput)
+			return;
 
 		var hookBusy = _stateMachine?.CurrentState == PlayerState.Hook;
 		var attackBusy = _stateMachine?.IsAttackLocking == true;

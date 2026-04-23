@@ -1,18 +1,24 @@
 [gd_scene load_steps=4 format=3 uid="uid://bymnyvbnttlak"]
 
-[ext_resource type="Script" uid="uid://dkxm73ljwelar" path="res://MapBuilder/Scripts/LevelManager.cs" id="1_nhd2b"]
+[ext_resource type="Script" uid="uid://bgfyu1ly15tk1" path="res://MapBuilder/Scripts/RoomManager.cs" id="1_ycnad"]
 [ext_resource type="Resource" uid="uid://c8yxjxnxn8r7f" path="res://MapBuilder/Examples/room/room_001_data.tres" id="2_ycnad"]
 [ext_resource type="PackedScene" uid="uid://c0xm3t8ebf7rc" path="res://player/player.tscn" id="3_qsiit"]
 
-[node name="ExampleEntry" type="Node2D" node_paths=PackedStringArray("player", "camera")]
-script = ExtResource("1_nhd2b")
-InitialRoom = ExtResource("2_ycnad")
+[node name="ExampleEntry" type="Node2D" node_paths=PackedStringArray("player", "_camera")]
+script = ExtResource("1_ycnad")
+initialRoom = ExtResource("2_ycnad")
 player = NodePath("Player")
-camera = NodePath("Player/Camera2D")
+_camera = NodePath("Camera2D")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(236, 202)
+position_smoothing_enabled = true
+editor_draw_limits = true
+editor_draw_drag_margin = true
 
 [node name="Player" parent="." instance=ExtResource("3_qsiit")]
 position = Vector2(236, 202)
 JumpVelocity = 720.0
 
-[node name="Camera2D" type="Camera2D" parent="Player"]
-position_smoothing_enabled = true
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Player"]
+remote_path = NodePath("../../Camera2D")

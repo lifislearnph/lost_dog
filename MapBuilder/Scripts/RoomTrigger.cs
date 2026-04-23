@@ -9,7 +9,9 @@ public partial class RoomTrigger : Area2D
 	[Export(PropertyHint.File, "*.tres")]
 	public string TargetRoomPath;
 
+	[Export] public Vector2 cameraPoint;
 	[Export] public Vector2 PlayerSpawnPosition;//出生点
+	
 
 	public override void _Ready()
 	{
@@ -31,13 +33,13 @@ public partial class RoomTrigger : Area2D
 
 	private void TriggerRoomChange()
 	{
-		if (!string.IsNullOrEmpty(TargetRoomPath) && LevelManager.Instance != null)
+		if (!string.IsNullOrEmpty(TargetRoomPath) && RoomManager.Instance != null)
 		{
 			// 运行时动态加载房间数据，避免场景循环依赖RoomData数据
 			var targetRoom = GD.Load<RoomData>(TargetRoomPath);
 			if (targetRoom != null)
 			{
-				LevelManager.Instance.ChangeRoom(targetRoom, PlayerSpawnPosition);
+				RoomManager.Instance.ChangeRoom(targetRoom, PlayerSpawnPosition,cameraPoint);
 			}
 		}
 	}

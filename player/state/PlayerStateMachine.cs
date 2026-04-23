@@ -79,6 +79,22 @@ public sealed class PlayerStateMachine
 		AttackStateLeft = Mathf.Max(0f, AttackStateLeft - dt);
 		JumpBufferLeft = Mathf.Max(0f, JumpBufferLeft - dt);
 
+		if (_player.IsInputLocked)
+		{
+			// 传入空输入，让 TickLocomotion 仍处理重力 + MoveAndSlide
+			var emptyInput = new PlayerInput(
+				attackJustPressed: false,
+				wantCrouch: false,
+				crouchJustPressed: false,
+				jumpJustPressed: false,
+				jumpJustReleased: false,
+				inputX: 0f,
+				moveX: 0f
+			);
+			_states[CurrentState].PhysicsUpdate(this, _player, emptyInput, dt);
+			return;
+		}
+		
 		// ---- input snapshot
 		var onFloorStart = _player.IsOnFloor();
 		CoyoteLeft = onFloorStart ? _player.CoyoteTime : Mathf.Max(0f, CoyoteLeft - dt);

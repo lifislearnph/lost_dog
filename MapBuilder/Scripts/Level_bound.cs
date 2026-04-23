@@ -1,6 +1,7 @@
-using System.Threading.Tasks;
 using Godot;
-
+/// <summary>
+/// 用来手动框定房间内摄像机的边界
+/// </summary>
 [Tool]
 public partial class Level_bound : Node2D
 {
@@ -33,35 +34,20 @@ public partial class Level_bound : Node2D
     [Export(PropertyHint.Range, "1,10,")]
     public float BorderLineWidth { get; set; } = 2.0f;
 
-    private Camera2D _camera;
-
     public override async void _Ready()
     {
         // 设置z-index,确保边界始终能够显示在最上层
         ZIndex = 1000;
         if (Engine.IsEditorHint())
             return;
-      //  Camera2D _camera = null ;
-        while (_camera==null)
-        {
-            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);//每帧检查一次，不暂停游戏，直到找到Camera2D
-            _camera = GetViewport().GetCamera2D();
-        }
-        //这一段有问题：
-        _camera.LimitLeft = (int)GlobalPosition.X;
-        _camera.LimitTop = (int)GlobalPosition.Y;
-        _camera.LimitRight = (int)GlobalPosition.X + _rectWidth;
-        _camera.LimitBottom = (int)GlobalPosition.Y + _rectHeight;
     }
 
     public override void _Process(double delta)
     {
-        
     }
 
     public override void _Draw()
     {
-
         var rect=new Rect2(GlobalPosition, _rectWidth, _rectHeight);
         // 绘制边框
         DrawRect(rect, BorderColor,false, BorderLineWidth);
