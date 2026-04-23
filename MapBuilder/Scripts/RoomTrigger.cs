@@ -9,9 +9,8 @@ public partial class RoomTrigger : Area2D
 	[Export(PropertyHint.File, "*.tres")]
 	public string TargetRoomPath;
 
-	[Export] public Vector2 cameraPoint;
+    //[Export] public Vector2 cameraPoint;
 	[Export] public Vector2 PlayerSpawnPosition;//出生点
-	
 
 	public override void _Ready()
 	{
@@ -39,7 +38,7 @@ public partial class RoomTrigger : Area2D
 			var targetRoom = GD.Load<RoomData>(TargetRoomPath);
 			if (targetRoom != null)
 			{
-				RoomManager.Instance.ChangeRoom(targetRoom, PlayerSpawnPosition,cameraPoint);
+				RoomManager.Instance.ChangeRoom(targetRoom, PlayerSpawnPosition);
 			}
 		}
 	}

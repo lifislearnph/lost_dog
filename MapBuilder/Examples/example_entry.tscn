@@ -9,9 +9,11 @@ script = ExtResource("1_ycnad")
 initialRoom = ExtResource("2_ycnad")
 player = NodePath("Player")
 _camera = NodePath("Camera2D")
+_autoSetLimit = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(236, 202)
+zoom = Vector2(0.8, 0.8)
 position_smoothing_enabled = true
 editor_draw_limits = true
 editor_draw_drag_margin = true

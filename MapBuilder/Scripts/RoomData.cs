@@ -17,8 +17,4 @@ public partial class RoomData : Resource
 	/// <summary>房间在世界中的全局位置</summary>
 	[Export]
 	public Vector2 RoomPosition { get; set; }
-
-	/// <summary>摄像机边界 (相对位置)</summary>
-	[Export]
-	public Rect2 CameraBounds { get; set; } = new(0, 0, 1152, 648); // 默认 16:9
 }

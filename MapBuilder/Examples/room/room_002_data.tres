@@ -7,5 +7,4 @@
 script = ExtResource("1_b4hg8")
 RoomId = "Room_002"
 RoomScene = ExtResource("1_5qw36")
-RoomPosition = Vector2(2000, 0)
-CameraBounds = Rect2(2000, 0, 2000, 648)
+RoomPosition = Vector2(4000, 0)

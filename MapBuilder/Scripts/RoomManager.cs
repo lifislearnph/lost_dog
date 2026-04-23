@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Godot;
 
 /// <summary>
@@ -15,6 +16,8 @@ public partial class RoomManager : Node2D
 	private Camera2D _camera;
 	[Export]
 	private bool _autoSetLimit;
+	[Export]
+	private float _transitionTime = 0.5f;
 
 	/// <summary> 内部变量 </summary>
 	public static RoomManager Instance { get; private set; }
@@ -45,7 +48,7 @@ public partial class RoomManager : Node2D
 		}
 	}
 	
-    public async void ChangeRoom(RoomData newRoom, Vector2 playerPosition,Vector2 cameraPoint)
+    public async void ChangeRoom(RoomData newRoom, Vector2 playerPosition)
 	{
 		// 防抖检查
 		if (IsTransitioning || newRoom == null || newRoom == CurrentRoom)
@@ -61,19 +64,23 @@ public partial class RoomManager : Node2D
 		//锁定人物输入
 		if (player != null)	player.SetLockPlayerInput(true);
 		
-		// 实例化新房间，并切换相机边界
+		// 实例化新房间
 		LoadRoom(newRoom);
-		SetCameraLimit();
-
-		// 3. 移动玩家到新位置
+		//移动玩家到新位置
 		if (player != null)
 		{
 			player.GlobalPosition = playerPosition;
 			GD.Print($"[LevelManager] 玩家移动到: {playerPosition}");
 		}
 
-		CurrentRoom = newRoom;
+		SetCameraLimit();
+		Vector2 cameraPosition = GetClampedCameraCenter(playerPosition);//获取相机被边界约束后的位置
 
+		//相机过渡动画
+		await TransitionCameraAnim(_camera.Position,cameraPosition);
+
+		
+		CurrentRoom = newRoom;
 		//解锁人物输入
 		if (player != null)	player.SetLockPlayerInput(false);
 
@@ -82,7 +89,8 @@ public partial class RoomManager : Node2D
 
 		GD.Print($"[LevelManager] 房间切换完成: {newRoom.RoomId}");
 	}
-	private void LoadRoom(RoomData roomData)
+
+    private void LoadRoom(RoomData roomData)
 		{
 			if (roomData == null) return;
 			GD.Print($"[LevelManager] 正在加载房间: {roomData.RoomId}");
@@ -141,6 +149,41 @@ public partial class RoomManager : Node2D
 				_camera.LimitBottom =(int)offset.Y + Math.Max((used.Position.Y + used.Size.Y) * tileSize, _camera.LimitBottom);
 			}
 		}
-
     }
+
+	private async Task TransitionCameraAnim(Vector2 from,Vector2 to)
+	{
+		// 先给一个宽松 limit，避免 tween 途中被旧 limit 卡住
+		_camera.LimitLeft = -10000000;
+		_camera.LimitTop = -10000000;
+		_camera.LimitRight = 10000000;
+		_camera.LimitBottom = 10000000;
+
+		_camera.GlobalPosition = from;
+
+		var tween = CreateTween();
+		tween.SetTrans(Tween.TransitionType.Sine);
+		tween.SetEase(Tween.EaseType.InOut);
+		tween.TweenProperty(_camera, "global_position", to, _transitionTime);
+		GD.Print($"从{from}过渡到{to}");
+
+		await ToSignal(tween, Tween.SignalName.Finished);
+		SetCameraLimit();
+	}
+
+	private Vector2 GetClampedCameraCenter(Vector2 desiredCenter)
+	{
+		Vector2 halfView = GetViewport().GetVisibleRect().Size * _camera.Zoom * 0.5f;
+
+		float minX = _camera.LimitLeft + halfView.X;
+		float maxX = _camera.LimitRight - halfView.X;
+		float minY = _camera.LimitTop + halfView.Y;
+		float maxY = _camera.LimitBottom - halfView.Y;
+
+		// 如果房间比视口还小，Clamp 会出问题，这里直接取中点
+		float x = minX <= maxX ? Mathf.Clamp(desiredCenter.X, minX, maxX) : (minX + maxX) * 0.5f;
+		float y = minY <= maxY ? Mathf.Clamp(desiredCenter.Y, minY, maxY) : (minY + maxY) * 0.5f;
+
+		return new Vector2(x, y);
+	}
 }

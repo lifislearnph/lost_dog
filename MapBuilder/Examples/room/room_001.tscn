@@ -17,7 +17,8 @@ script = ExtResource("4_eyw0s")
 RectWidth = 2091
 RectHeight = 560
 
-[node name="Area2D" parent="." instance=ExtResource("5_qemvk")]
+[node name="Area2D" parent="." groups=["tilemap"] instance=ExtResource("5_qemvk")]
 position = Vector2(2069, 411)
 scale = Vector2(0.1682089, 1)
 TargetRoomPath = "uid://jlhhxcjguhay"
+PlayerSpawnPosition = Vector2(4100, 511.979)
